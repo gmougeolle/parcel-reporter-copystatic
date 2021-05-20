@@ -15,17 +15,21 @@ const copier = new Reporter({
 
     if (!config) throw new Error(`no valid config section in package.json.`);
 
-    const src = options.projectRoot + "/" + config.staticPath[0].staticPath;
-    const dest = options.projectRoot + "/" + config.staticPath[0].staticOutDir;
+    const paths = config.staticPath;
 
-    const result = await copy("**", dest, { cwd: src });
+    paths.forEach(async path => {
+      const src = options.projectRoot + "/" + path.staticPath;
+      const dest = options.projectRoot + "/" + path.staticOutDir;
 
-    if(result.some(val => (val !== false && val !== "dir")))
-      console.log(`📄 Wrote static files from : ${src} to: ${dest}`);
-  },
+      const result = await copy("**", dest, { cwd: src });
+
+      if (result.some(val => val !== false && val !== "dir"))
+        console.log(`📄 Wrote static files from : ${src} to: ${dest}`);
+    });
+  }
 });
 
-const loadConfig = (rootFolder) => {
+const loadConfig = rootFolder => {
   const packageJson = fs
     .readFileSync(path.join(rootFolder, "package.json"))
     .toString();
